@@ -1,21 +1,41 @@
 package main
 
 import (
-  "fmt"
+	"PracticalProject/models"
+	"fmt"
+	"github.com/gin-gonic/gin"
+	"net/http"
 )
 
 //TIP <p>To run your code, right-click the code and select <b>Run</b>.</p> <p>Alternatively, click
 // the <icon src="AllIcons.Actions.Execute"/> icon in the gutter and select the <b>Run</b> menu item from here.</p>
 
 func main() {
-  //TIP <p>Press <shortcut actionId="ShowIntentionActions"/> when your caret is at the underlined text
-  // to see how GoLand suggests fixing the warning.</p><p>Alternatively, if available, click the lightbulb to view possible fixes.</p>
-  s := "gopher"
-  fmt.Println("Hello and welcome, %s!", s)
 
-  for i := 1; i <= 5; i++ {
-	//TIP <p>To start your debugging session, right-click your code in the editor and select the Debug option.</p> <p>We have set one <icon src="AllIcons.Debugger.Db_set_breakpoint"/> breakpoint
-	// for you, but you can always add more by pressing <shortcut actionId="ToggleLineBreakpoint"/>.</p>
-	fmt.Println("i =", 100/i)
-  }
+	fmt.Println("Hello World")
+	r := gin.Default()
+
+	r.GET("/users", GetUsers)
+	r.POST("/users", OnOrOff)
+
+	r.Run(":8888")
+}
+
+var users = []models.User{
+	{Id: 1, Name: "Beibit", Email: "beibit.muzappar@narxoz.kz", Password: "bbb", Phone: "87072960605", Address: "T60"},
+	{Id: 2, Name: "Yersin", Email: "yersin.bizak@narxoz.kz", Password: "yyy", Phone: "87054562135", Address: "R41"},
+}
+
+func GetUsers(c *gin.Context) {
+	c.JSON(500, users)
+}
+func OnOrOff(c *gin.Context) {
+	var user models.User
+	if err := c.ShouldBindJSON(&user); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"Error": err.Error()})
+		return
+	}
+	user.Id = len(users) + 1
+	users = append(users, user)
+	c.JSON(http.StatusCreated, user)
 }
