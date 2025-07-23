@@ -1,10 +1,9 @@
 package main
 
 import (
-	"PracticalProject/models"
+	"PracticalProject/handlers"
 	"fmt"
 	"github.com/gin-gonic/gin"
-	"net/http"
 )
 
 //TIP <p>To run your code, right-click the code and select <b>Run</b>.</p> <p>Alternatively, click
@@ -15,27 +14,17 @@ func main() {
 	fmt.Println("Hello World")
 	r := gin.Default()
 
-	r.GET("/users", GetUsers)
-	r.POST("/users", OnOrOff)
+	r.GET("/users", handlers.GetUsers)
+	r.GET("/users/:id", handlers.GetByIdUser)
+	r.POST("/users", handlers.CreateUser)
+	r.PUT("/users/:id", handlers.UpdateUser)
+	r.DELETE("/users/:id", handlers.DeleteUser)
+
+	r.GET("/products", handlers.GetProduct)
+	r.GET("/products/:id", handlers.GetById)
+	r.POST("/products", handlers.CreateProduct)
+	r.PUT("/products/:id", handlers.UpdateProduct)
+	r.DELETE("/products/:id", handlers.DeleteProduct)
 
 	r.Run(":8888")
-}
-
-var users = []models.User{
-	{Id: 1, Name: "Beibit", Email: "beibit.muzappar@narxoz.kz", Password: "bbb", Phone: "87072960605", Address: "T60"},
-	{Id: 2, Name: "Yersin", Email: "yersin.bizak@narxoz.kz", Password: "yyy", Phone: "87054562135", Address: "R41"},
-}
-
-func GetUsers(c *gin.Context) {
-	c.JSON(500, users)
-}
-func OnOrOff(c *gin.Context) {
-	var user models.User
-	if err := c.ShouldBindJSON(&user); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"Error": err.Error()})
-		return
-	}
-	user.Id = len(users) + 1
-	users = append(users, user)
-	c.JSON(http.StatusCreated, user)
 }
