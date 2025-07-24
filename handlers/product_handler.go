@@ -9,7 +9,7 @@ import (
 )
 
 func GetProduct(c *gin.Context) {
-	var products models.Product
+	var products []models.Product
 	if err := config.DB.Find(&products).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"Error": err.Error()})
 		return
