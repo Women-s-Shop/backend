@@ -8,7 +8,7 @@ import (
 )
 
 func GetUsers(c *gin.Context) {
-	var users models.User
+	var users []models.User
 	if err := config.DB.Find(&users).Error; err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"Error": err.Error()})
 		return
