@@ -3,8 +3,8 @@ package models
 import "time"
 
 type Category struct {
-	Id          int    `json:"id"`
-	Name        string `json:"name"`
+	ID          uint   `gorm:"primaryKey" json:"id"`
+	Name        string `gorm:"not null" json:"name"`
 	Description string `json:"description"`
 	CreatedAt   time.Time
 	UpdatedAt   time.Time

@@ -3,10 +3,10 @@ package models
 import "time"
 
 type Inventory struct {
-	Id        int `json:"id"`
-	ProductId uint
+	ID        uint   `gorm:"primaryKey" json:"id"`
+	ProductID uint   `gorm:"not null"`
 	Quantity  int    `json:"quantity"`
 	Size      string `json:"size"`
 	Color     string `json:"color"`
-	UpdateAt  time.Time
+	UpdatedAt time.Time
 }

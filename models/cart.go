@@ -3,12 +3,12 @@ package models
 import "time"
 
 type Cart struct {
-	Id        uint `json:"id"`
-	UserId    uint
-	ProductId uint
+	ID        uint   `gorm:"primaryKey" json:"id"`
+	UserID    uint   `gorm:"not null"`
+	ProductID uint   `gorm:"not null"`
 	Quantity  string `json:"quantity"`
 	Size      string `json:"size"`
 	Color     string `json:"color"`
 	CreatedAt time.Time
-	UpdateAt  time.Time
+	UpdatedAt time.Time
 }

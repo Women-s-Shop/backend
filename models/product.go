@@ -3,12 +3,12 @@ package models
 import "time"
 
 type Product struct {
-	Id          uint   `gorm:"primaryKey;autoIncrement"`
+	ID          uint   `gorm:"primaryKey;autoIncrement" json:"id"`
 	Name        string `json:"name"`
 	Description string `json:"description"`
 	Price       int    `json:"price"`
-	ImageUrl    string
-	CategoryId  uint
+	ImageUrl    string `json:"image_url"`
+	CategoryID  uint   `gorm:"not null"`
 	CreatedAt   time.Time
-	UpdateAt    time.Time
+	UpdatedAt   time.Time
 }
