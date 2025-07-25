@@ -18,7 +18,7 @@ func InitDB() {
 		panic("Failed to connected to database!!!")
 	}
 	DB = database
-	err = database.AutoMigrate(models.User{}, models.Product{})
+	err = database.AutoMigrate(models.User{}, models.Product{}, models.Cart{}, models.Category{}, models.Inventory{}, models.Order{}, models.OrderItem{}, models.Payment{}, models.Promocode{})
 	if err != nil {
 		log.Fatal("Migrate failed ", err)
 	}

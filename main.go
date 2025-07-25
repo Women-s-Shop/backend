@@ -2,8 +2,10 @@ package main
 
 import (
 	"PracticalProject/config"
+	"PracticalProject/handlers"
 	"PracticalProject/routes"
 	"fmt"
+	"github.com/gin-gonic/gin"
 )
 
 //TIP <p>To run your code, right-click the code and select <b>Run</b>.</p> <p>Alternatively, click
