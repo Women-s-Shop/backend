@@ -22,6 +22,21 @@ func GenerateJWT(userID uint) (string, error) {
 			IssuedAt:  jwt.NewNumericDate(time.Now()),
 		},
 	}
-	token := jwt.NewWithClaims(jwt.SigningMethodES256, claim)
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claim)
 	return token.SignedString(jwtKey)
+}
+
+func ValidateToken(tokenString string) (*JWTClaim, error) {
+	token, err := jwt.ParseWithClaims(tokenString, &JWTClaim{}, func(token *jwt.Token) (interface{}, error) {
+		return jwtKey, nil
+	})
+	if err != nil {
+		return nil, err
+	}
+	claims, ok := token.Claims.(*JWTClaim)
+	if !ok || !token.Valid {
+		return nil, err
+	}
+
+	return claims, nil
 }

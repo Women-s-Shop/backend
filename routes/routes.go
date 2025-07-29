@@ -2,12 +2,19 @@ package routes
 
 import (
 	"PracticalProject/handlers"
+	"PracticalProject/middleware"
 	"github.com/gin-gonic/gin"
 )
 
 func SetupRouter() *gin.Engine {
 	r := gin.Default()
-	users := r.Group("/users")
+	r.POST("/register", handlers.Register)
+	r.POST("/login", handlers.Login)
+
+	authorized := r.Group("/")
+	authorized.Use(middleware.AuthMiddleware())
+
+	users := authorized.Group("/users")
 	{
 		users.GET("/", handlers.GetUsers)
 		users.GET("/:id", handlers.GetByIdUser)
@@ -15,7 +22,7 @@ func SetupRouter() *gin.Engine {
 		users.PUT("/:id", handlers.UpdateUser)
 		users.DELETE("/:id", handlers.DeleteUser)
 	}
-	products := r.Group("/products")
+	products := authorized.Group("/products")
 	{
 		products.GET("/", handlers.GetProduct)
 		products.GET("/:id", handlers.GetById)
@@ -24,7 +31,7 @@ func SetupRouter() *gin.Engine {
 		products.DELETE("/:id", handlers.DeleteProduct)
 	}
 
-	carts := r.Group("/carts")
+	carts := authorized.Group("/carts")
 	{
 		carts.GET("/", handlers.GetCarts)
 		carts.GET("/:id", handlers.GetCartByID)
@@ -33,7 +40,7 @@ func SetupRouter() *gin.Engine {
 		carts.DELETE("/:id", handlers.DeleteCart)
 	}
 
-	categories := r.Group("/categories")
+	categories := authorized.Group("/categories")
 	{
 		categories.GET("/categories", handlers.GetCategories)
 		categories.GET("/categories/:id", handlers.GetCategoryByID)
@@ -41,7 +48,7 @@ func SetupRouter() *gin.Engine {
 		categories.PUT("/categories/:id", handlers.UpdateCategory)
 		categories.DELETE("/categories/:id", handlers.DeleteCategory)
 	}
-	inventories := r.Group("/inventories")
+	inventories := authorized.Group("/inventories")
 	{
 		inventories.GET("/", handlers.GetInventories)
 		inventories.GET("/:id", handlers.GetInventoryByID)
@@ -50,7 +57,7 @@ func SetupRouter() *gin.Engine {
 		inventories.DELETE("/:id", handlers.DeleteInventory)
 	}
 
-	orders := r.Group("/orders")
+	orders := authorized.Group("/orders")
 	{
 		orders.GET("/", handlers.GetOrders)
 		orders.GET("/:id", handlers.GetOrderByID)
@@ -59,7 +66,7 @@ func SetupRouter() *gin.Engine {
 		orders.DELETE("/:id", handlers.DeleteOrder)
 	}
 
-	orderItems := r.Group("/ordersItems")
+	orderItems := authorized.Group("/ordersItems")
 	{
 		orderItems.GET("/", handlers.GetOrderItems)
 		orderItems.GET("/:id", handlers.GetOrderItemByID)
@@ -68,16 +75,16 @@ func SetupRouter() *gin.Engine {
 		orderItems.DELETE("/:id", handlers.DeleteOrderItem)
 	}
 
-	payments := r.Group("/payments")
+	payments := authorized.Group("/payments")
 	{
 		payments.GET("/", handlers.GetPayments)
-		products.GET("/:id", handlers.GetPaymentByID)
+		payments.GET("/:id", handlers.GetPaymentByID)
 		payments.POST("/", handlers.CreatePayment)
 		payments.PUT("/:id", handlers.UpdatePayment)
 		payments.DELETE("/:id", handlers.DeletePayment)
 	}
 
-	promocodes := r.Group("/promocodes")
+	promocodes := authorized.Group("/promocodes")
 	{
 		promocodes.GET("/", handlers.GetPromocodes)
 		promocodes.GET("/:id", handlers.GetPromocodeByID)

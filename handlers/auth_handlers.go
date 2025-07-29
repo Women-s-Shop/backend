@@ -37,7 +37,7 @@ func Register(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "User registered successfully!!!"})
 }
 
-func Login(c gin.Context) {
+func Login(c *gin.Context) {
 	var input dto.LoginInput
 
 	if err := c.ShouldBindJSON(&input); err != nil {
