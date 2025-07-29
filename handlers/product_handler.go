@@ -5,7 +5,6 @@ import (
 	"PracticalProject/models"
 	"github.com/gin-gonic/gin"
 	"net/http"
-	"strconv"
 )
 
 func GetProduct(c *gin.Context) {
@@ -35,18 +34,13 @@ func CreateProduct(c *gin.Context) {
 func GetById(c *gin.Context) {
 	var products models.Product
 	idParam := c.Param("id")
-	id, err := strconv.Atoi(idParam)
 
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"Error": "Id not found"})
-		return
-	}
-	if err := config.DB.First(&products, &id).Error; err != nil {
+	if err := config.DB.First(&products, idParam).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"Error": err.Error()})
 		return
 	}
 
-	c.JSON(http.StatusNotFound, gin.H{"error": "Not found"})
+	c.JSON(http.StatusOK, gin.H{"This product": products})
 }
 
 func UpdateProduct(c *gin.Context) {
