@@ -1,8 +1,11 @@
 package routes
 
 import (
+	"PracticalProject/config"
 	"PracticalProject/handlers"
 	"PracticalProject/middleware"
+	"PracticalProject/repasitories"
+	"PracticalProject/services"
 	"github.com/gin-gonic/gin"
 )
 
@@ -10,6 +13,10 @@ func SetupRouter() *gin.Engine {
 	r := gin.Default()
 	r.POST("/register", handlers.Register)
 	r.POST("/login", handlers.Login)
+
+	productRepository := repasitories.NewProductRepository(config.DB)
+	productService := services.NewProductService(productRepository)
+	productHandler := handlers.NewProductHandler(productService)
 
 	authorized := r.Group("/")
 	authorized.Use(middleware.AuthMiddleware())
@@ -24,11 +31,11 @@ func SetupRouter() *gin.Engine {
 	}
 	products := authorized.Group("/products")
 	{
-		products.GET("/", handlers.GetProduct)
-		products.GET("/:id", handlers.GetById)
-		products.POST("/", handlers.CreateProduct)
-		products.PUT("/:id", handlers.UpdateProduct)
-		products.DELETE("/:id", handlers.DeleteProduct)
+		products.GET("/", productHandler.GetProduct)
+		products.GET("/:id", productHandler.GetById)
+		products.POST("/", productHandler.CreateProduct)
+		products.PUT("/:id", productHandler.UpdateProduct)
+		products.DELETE("/:id", productHandler.DeleteProduct)
 	}
 
 	carts := authorized.Group("/carts")
