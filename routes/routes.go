@@ -11,8 +11,11 @@ import (
 
 func SetupRouter() *gin.Engine {
 	r := gin.Default()
-	r.POST("/register", handlers.Register)
-	r.POST("/login", handlers.Login)
+	authRepository := repasitories.NewAuthRepository(config.DB)
+	authService := services.NewAuthService(authRepository)
+	authHandler := handlers.NewAuthHandler(authService)
+	r.POST("/register", authHandler.Register)
+	r.POST("/login", authHandler.Login)
 
 	productRepository := repasitories.NewProductRepository(config.DB)
 	productService := services.NewProductService(productRepository)
