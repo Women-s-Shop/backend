@@ -1,60 +1,94 @@
 package handlers
 
 import (
-	"PracticalProject/config"
 	"PracticalProject/models"
+	"PracticalProject/services"
 	"github.com/gin-gonic/gin"
 	"net/http"
+	"strconv"
 )
 
-func GetCarts(c *gin.Context) {
-	var carts []models.Cart
-	if err := config.DB.Find(&carts).Error; err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"Error": err.Error()})
+type CartHandler struct {
+	service services.CartService
+}
+
+func NewCartHandler(service services.CartService) CartHandler {
+	return CartHandler{service}
+}
+
+func (h *CartHandler) GetCarts(c *gin.Context) {
+	carts, err := h.service.GetAll()
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"Error": err.Error(),
+		})
 		return
 	}
+
 	c.JSON(200, carts)
 }
 
-func CreateCart(c *gin.Context) {
+func (h *CartHandler) CreateCart(c *gin.Context) {
 	var cart models.Cart
 	if err := c.ShouldBindJSON(&cart); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"Error": err.Error()})
 		return
 	}
-	if err := config.DB.Create(&cart).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"Error": err.Error()})
+	if err := h.service.CreateCart(&cart); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"message": "Cart creation failed",
+			"Error":   err.Error()})
 		return
 	}
+	c.JSON(http.StatusCreated, cart)
+}
+
+func (h *CartHandler) GetCartByID(c *gin.Context) {
+	idParam := c.Param("id")
+	id, err := strconv.ParseUint(idParam, 10, 64)
+	if err != nil {
+		c.JSON(400, gin.H{
+			"message": "Invalid cart Id",
+			"Error":   err.Error(),
+		})
+		return
+	}
+	cart, err := h.service.GetById(uint(id))
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{
+			"message": "Cart not found",
+			"Error":   err.Error(),
+		})
+		return
+	}
+
 	c.JSON(http.StatusOK, cart)
 }
 
-func GetCartByID(c *gin.Context) {
-	var cart models.Cart
-	id := c.Param("id")
-	if err := config.DB.First(&cart, id).Error; err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"Error": "Cart not found"})
+func (h *CartHandler) UpdateCart(c *gin.Context) {
+	idParam := c.Param("id")
+	id, err := strconv.ParseUint(idParam, 10, 64)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"message": "Invalid cart ID",
+			"Error":   err.Error(),
+		})
 		return
 	}
-	c.JSON(http.StatusOK, cart)
-}
-
-func UpdateCart(c *gin.Context) {
-	var cart models.Cart
-	id := c.Param("id")
-
-	if err := config.DB.First(&cart, id).Error; err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"Error": "Cart not found"})
+	cart, err := h.service.GetById(uint(id))
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{
+			"message": "Cart not found",
+			"Error":   err.Error(),
+		})
 		return
 	}
-
-	var updatedCart models.Cart
-	if err := c.ShouldBindJSON(&updatedCart); err != nil {
+	if err := c.ShouldBindJSON(cart); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"Error": err.Error()})
 		return
 	}
 
-	if err := config.DB.Model(&cart).Updates(updatedCart).Error; err != nil {
+	if err := h.service.UpdateCart(cart); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"Error": err.Error()})
 		return
 	}
@@ -62,16 +96,26 @@ func UpdateCart(c *gin.Context) {
 	c.JSON(http.StatusOK, cart)
 }
 
-func DeleteCart(c *gin.Context) {
-	var cart models.Cart
-	id := c.Param("id")
-
-	if err := config.DB.First(&cart, id).Error; err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"Error": "Cart not found"})
+func (h *CartHandler) DeleteCart(c *gin.Context) {
+	idParam := c.Param("id")
+	id, err := strconv.ParseUint(idParam, 10, 64)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"message": "Invalid cart ID",
+			"Error":   err.Error(),
+		})
+		return
+	}
+	cart, err := h.service.GetById(uint(id))
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{
+			"message": "Cart not found",
+			"Error":   err.Error(),
+		})
 		return
 	}
 
-	if err := config.DB.Delete(&cart).Error; err != nil {
+	if err := h.service.DeleteCart(cart); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"Error": err.Error()})
 		return
 	}

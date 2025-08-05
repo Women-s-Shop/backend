@@ -43,7 +43,7 @@ func (h *ProductHandler) CreateProduct(c *gin.Context) {
 			"Error":   err.Error(),
 		})
 	}
-	c.JSON(200, newProducts)
+	c.JSON(201, newProducts)
 
 	//var products models.Product
 	//if err := c.ShouldBindJSON(&products); err != nil {
