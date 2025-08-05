@@ -41,13 +41,16 @@ func SetupRouter() *gin.Engine {
 		products.DELETE("/:id", productHandler.DeleteProduct)
 	}
 
+	cartRepository := repasitories.NewCartRepository(config.DB)
+	cartService := services.NewCartService(cartRepository)
+	cartHandler := handlers.NewCartHandler(cartService)
 	carts := authorized.Group("/carts")
 	{
-		carts.GET("/", handlers.GetCarts)
-		carts.GET("/:id", handlers.GetCartByID)
-		carts.POST("/", handlers.CreateCart)
-		carts.PUT("/:id", handlers.UpdateCart)
-		carts.DELETE("/:id", handlers.DeleteCart)
+		carts.GET("/", cartHandler.GetCarts)
+		carts.GET("/:id", cartHandler.GetCartByID)
+		carts.POST("/", cartHandler.CreateCart)
+		carts.PUT("/:id", cartHandler.UpdateCart)
+		carts.DELETE("/:id", cartHandler.DeleteCart)
 	}
 
 	categories := authorized.Group("/categories")
