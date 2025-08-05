@@ -2,7 +2,7 @@ package services
 
 import (
 	"PracticalProject/models"
-	"PracticalProject/repasitories"
+	"PracticalProject/repositories"
 )
 
 type ProductService interface {
@@ -14,10 +14,10 @@ type ProductService interface {
 }
 
 type productService struct {
-	repo repasitories.ProductRepository
+	repo repositories.ProductRepository
 }
 
-func NewProductService(repo repasitories.ProductRepository) ProductService {
+func NewProductService(repo repositories.ProductRepository) ProductService {
 	return &productService{repo}
 }
 

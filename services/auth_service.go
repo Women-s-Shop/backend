@@ -3,7 +3,7 @@ package services
 import (
 	"PracticalProject/dto"
 	"PracticalProject/models"
-	"PracticalProject/repasitories"
+	"PracticalProject/repositories"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -13,10 +13,10 @@ type AuthService interface {
 }
 
 type authService struct {
-	repo repasitories.AuthRepository
+	repo repositories.AuthRepository
 }
 
-func NewAuthService(repo repasitories.AuthRepository) AuthService {
+func NewAuthService(repo repositories.AuthRepository) AuthService {
 	return &authService{repo}
 }
 
