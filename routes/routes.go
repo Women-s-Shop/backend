@@ -1,28 +1,20 @@
 package routes
 
 import (
-	"PracticalProject/config"
 	"PracticalProject/handlers"
 	"PracticalProject/middleware"
-	"PracticalProject/repasitories"
-	"PracticalProject/services"
 	"github.com/gin-gonic/gin"
 )
 
 func SetupRouter() *gin.Engine {
 	r := gin.Default()
-	authRepository := repasitories.NewAuthRepository(config.DB)
-	authService := services.NewAuthService(authRepository)
-	authHandler := handlers.NewAuthHandler(authService)
-	r.POST("/register", authHandler.Register)
-	r.POST("/login", authHandler.Login)
 
-	productRepository := repasitories.NewProductRepository(config.DB)
-	productService := services.NewProductService(productRepository)
-	productHandler := handlers.NewProductHandler(productService)
+	InitAuthRoutes(r)
 
 	authorized := r.Group("/")
 	authorized.Use(middleware.AuthMiddleware())
+
+	InitProductRoutes(authorized)
 
 	users := authorized.Group("/users")
 	{
@@ -32,26 +24,8 @@ func SetupRouter() *gin.Engine {
 		users.PUT("/:id", handlers.UpdateUser)
 		users.DELETE("/:id", handlers.DeleteUser)
 	}
-	products := authorized.Group("/products")
-	{
-		products.GET("/", productHandler.GetProduct)
-		products.GET("/:id", productHandler.GetById)
-		products.POST("/", productHandler.CreateProduct)
-		products.PUT("/:id", productHandler.UpdateProduct)
-		products.DELETE("/:id", productHandler.DeleteProduct)
-	}
 
-	cartRepository := repasitories.NewCartRepository(config.DB)
-	cartService := services.NewCartService(cartRepository)
-	cartHandler := handlers.NewCartHandler(cartService)
-	carts := authorized.Group("/carts")
-	{
-		carts.GET("/", cartHandler.GetCarts)
-		carts.GET("/:id", cartHandler.GetCartByID)
-		carts.POST("/", cartHandler.CreateCart)
-		carts.PUT("/:id", cartHandler.UpdateCart)
-		carts.DELETE("/:id", cartHandler.DeleteCart)
-	}
+	InitCartRoutes(authorized)
 
 	categories := authorized.Group("/categories")
 	{

@@ -1,4 +1,4 @@
-package repasitories
+package repositories
 
 import (
 	"PracticalProject/models"
