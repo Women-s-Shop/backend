@@ -22,12 +22,7 @@ func (h *ProductHandler) GetProduct(c *gin.Context) {
 		return
 	}
 	c.JSON(200, products)
-	//var products []models.Product
-	//if err := config.DB.Find(&products).Error; err != nil {
-	//	c.JSON(http.StatusInternalServerError, gin.H{"Error": err.Error()})
-	//	return
-	//}
-	//c.JSON(200, products)
+
 }
 
 func (h *ProductHandler) CreateProduct(c *gin.Context) {
@@ -45,18 +40,6 @@ func (h *ProductHandler) CreateProduct(c *gin.Context) {
 	}
 	c.JSON(201, newProducts)
 
-	//var products models.Product
-	//if err := c.ShouldBindJSON(&products); err != nil {
-	//	c.JSON(http.StatusBadRequest, gin.H{"Error": err.Error()})
-	//	return
-	//}
-
-	//if err := config.DB.Create(&products).Error; err != nil {
-	//	c.JSON(http.StatusInternalServerError, gin.H{"Error": err.Error()})
-	//	return
-	//}
-
-	//c.JSON(http.StatusOK, products)
 }
 
 func (h *ProductHandler) GetById(c *gin.Context) {
@@ -69,16 +52,7 @@ func (h *ProductHandler) GetById(c *gin.Context) {
 		})
 	}
 	c.JSON(200, gin.H{"This product": product})
-	//
-	//var products models.Product
-	//idParam := c.Param("id")
-	//
-	//if err := config.DB.First(&products, idParam).Error; err != nil {
-	//	c.JSON(http.StatusInternalServerError, gin.H{"Error": err.Error()})
-	//	return
-	//}
-	//
-	//c.JSON(http.StatusOK, gin.H{"This product": products})
+
 }
 
 func (h *ProductHandler) UpdateProduct(c *gin.Context) {
@@ -100,18 +74,6 @@ func (h *ProductHandler) UpdateProduct(c *gin.Context) {
 	}
 	c.JSON(200, updated)
 
-	//if err := config.DB.First(&products, idParam).Error; err != nil {
-	//	c.JSON(http.StatusNotFound, gin.H{"Error": "There is no such id"})
-	//	return
-	//}
-	//
-	//var updateProduct models.Product
-	//if err := c.ShouldBindJSON(&updateProduct); err != nil {
-	//	c.JSON(http.StatusBadRequest, gin.H{"Error": "JSON error"})
-	//	return
-	//}
-	//config.DB.Model(&products).Updates(updateProduct)
-	//c.JSON(200, products)
 }
 
 func (h *ProductHandler) DeleteProduct(c *gin.Context) {
@@ -122,12 +84,5 @@ func (h *ProductHandler) DeleteProduct(c *gin.Context) {
 			"Error":   err.Error(),
 		})
 	}
-
-	//if err := config.DB.First(&products, idParam).Error; err != nil {
-	//	c.JSON(404, gin.H{"Error": "There is no such id"})
-	//	return
-	//}
-	//config.DB.Delete(&products)
-
 	c.JSON(200, gin.H{"message": "Product deleted successfully"})
 }

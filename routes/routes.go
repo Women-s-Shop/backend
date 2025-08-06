@@ -44,14 +44,7 @@ func SetupRouter() *gin.Engine {
 		inventories.DELETE("/:id", handlers.DeleteInventory)
 	}
 
-	orders := authorized.Group("/orders")
-	{
-		orders.GET("/", handlers.GetOrders)
-		orders.GET("/:id", handlers.GetOrderByID)
-		orders.POST("/", handlers.CreateOrder)
-		orders.PUT("/:id", handlers.UpdateOrder)
-		orders.DELETE("/:id", handlers.DeleteOrder)
-	}
+	InitOrderRoutes(authorized)
 
 	orderItems := authorized.Group("/ordersItems")
 	{
