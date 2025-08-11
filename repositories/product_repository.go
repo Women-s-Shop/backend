@@ -52,6 +52,6 @@ func (r *productRepository) Delete(id string) error {
 	if err := r.db.First(&product, id).Error; err != nil {
 		return err
 	}
-	err := r.db.Delete(&product, id).Error
+	err := r.db.Delete(&product).Error
 	return err
 }

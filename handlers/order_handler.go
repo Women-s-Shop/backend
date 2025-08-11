@@ -1,80 +1,85 @@
 package handlers
 
 import (
-	"PracticalProject/config"
 	"PracticalProject/models"
+	"PracticalProject/services"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
 
-func GetOrders(c *gin.Context) {
-	var orders []models.Order
-	if err := config.DB.Find(&orders).Error; err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"Error": err.Error()})
+type OrderHandler struct {
+	service services.OrderService
+}
+
+func NewOrderHandler(service services.OrderService) OrderHandler {
+	return OrderHandler{service}
+}
+
+func (h *OrderHandler) GetOrders(c *gin.Context) {
+
+	orders, err := h.service.GetAll()
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"Error": err.Error(),
+		})
 		return
 	}
 	c.JSON(http.StatusOK, orders)
 }
 
-func CreateOrder(c *gin.Context) {
+func (h *OrderHandler) CreateOrder(c *gin.Context) {
 	var order models.Order
 	if err := c.ShouldBindJSON(&order); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"Error": err.Error()})
 		return
 	}
-	if err := config.DB.Create(&order).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"Error": err.Error()})
+	if err := h.service.CreateOrder(&order); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"message": "Order creation failed",
+			"Error":   err.Error(),
+		})
+		return
+	}
+	c.JSON(http.StatusCreated, order)
+}
+
+func (h *OrderHandler) GetOrderByID(c *gin.Context) {
+	id := c.Param("id")
+	order, err := h.service.GetByID(id)
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{
+			"message": "Order not found",
+			"Error":   err.Error(),
+		})
 		return
 	}
 	c.JSON(http.StatusOK, order)
 }
 
-func GetOrderByID(c *gin.Context) {
-	var order models.Order
+func (h *OrderHandler) UpdateOrder(c *gin.Context) {
 	id := c.Param("id")
-	if err := config.DB.First(&order, id).Error; err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"Error": "Order not found"})
+
+	var fields map[string]interface{}
+	if err := c.ShouldBindJSON(&fields); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	c.JSON(http.StatusOK, order)
+
+	if err := h.service.UpdateOrder(id, fields); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "Order updated successfully"})
 }
 
-func UpdateOrder(c *gin.Context) {
-	var order models.Order
+func (h *OrderHandler) DeleteOrder(c *gin.Context) {
 	id := c.Param("id")
-
-	if err := config.DB.First(&order, id).Error; err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"Error": "Order not found"})
-		return
+	if err := h.service.DeleteOrder(id); err != nil {
+		c.JSON(http.StatusNotFound, gin.H{
+			"message": "Order not found",
+			"Error":   err.Error(),
+		})
 	}
-
-	var updatedOrder models.Order
-	if err := c.ShouldBindJSON(&updatedOrder); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"Error": err.Error()})
-		return
-	}
-
-	if err := config.DB.Model(&order).Updates(updatedOrder).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"Error": err.Error()})
-		return
-	}
-
-	c.JSON(http.StatusOK, order)
-}
-
-func DeleteOrder(c *gin.Context) {
-	var order models.Order
-	id := c.Param("id")
-
-	if err := config.DB.First(&order, id).Error; err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"Error": "Order not found"})
-		return
-	}
-
-	if err := config.DB.Delete(&order).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"Error": err.Error()})
-		return
-	}
-
 	c.JSON(http.StatusOK, gin.H{"message": "Order deleted successfully"})
 }
