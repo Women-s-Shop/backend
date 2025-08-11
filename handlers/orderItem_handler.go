@@ -1,16 +1,20 @@
 package handlers
 
 import (
-	"PracticalProject/config"
 	"PracticalProject/models"
+	"PracticalProject/services"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
 
 func GetOrderItems(c *gin.Context) {
-	var orderItems []models.OrderItem
-	if err := config.DB.Find(&orderItems).Error; err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"Error": err.Error()})
+	var orderItemService services.OrderService
+	orderItems, err := orderItemService.GetAll()
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"message": "Invalid JSON",
+			"Error":   err.Error(),
+		})
 		return
 	}
 	c.JSON(http.StatusOK, orderItems)
@@ -22,59 +26,72 @@ func CreateOrderItem(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"Error": err.Error()})
 		return
 	}
-	if err := config.DB.Create(&orderItem).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"Error": err.Error()})
+	var orderItemService services.OrderItemService
+	createOrderItem, err := orderItemService.Create(orderItem)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"message": "Order Item creation filed",
+			"error":   err.Error(),
+		})
 		return
 	}
-	c.JSON(http.StatusOK, orderItem)
+
+	c.JSON(http.StatusCreated, createOrderItem)
 }
 
 func GetOrderItemByID(c *gin.Context) {
-	var orderItem models.OrderItem
+	var orderItemService services.OrderItemService
 	id := c.Param("id")
-	if err := config.DB.First(&orderItem, id).Error; err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"Error": "OrderItem not found"})
+	orderItem, err := orderItemService.GetByID(id)
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{
+			"message": "OrderItem not found",
+			"error":   err.Error(),
+		})
 		return
 	}
 	c.JSON(http.StatusOK, orderItem)
 }
 
 func UpdateOrderItem(c *gin.Context) {
-	var orderItem models.OrderItem
 	id := c.Param("id")
+	var orderItemService services.OrderItemService
 
-	if err := config.DB.First(&orderItem, id).Error; err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"Error": "OrderItem not found"})
+	orderItem, err := orderItemService.GetByID(id)
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{
+			"message": "OrderItem not found",
+			"error":   err.Error(),
+		})
 		return
 	}
-
 	var updatedOrderItem models.OrderItem
 	if err := c.ShouldBindJSON(&updatedOrderItem); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"Error": err.Error()})
 		return
 	}
-
-	if err := config.DB.Model(&orderItem).Updates(updatedOrderItem).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"Error": err.Error()})
+	updatedOrderItem.ID = orderItem.ID
+	updateItem, err := orderItemService.Update(updatedOrderItem)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"message": "OrderItem updating filed",
+			"error":   err.Error(),
+		})
 		return
 	}
-
-	c.JSON(http.StatusOK, orderItem)
+	c.JSON(http.StatusOK, updateItem)
 }
 
 func DeleteOrderItem(c *gin.Context) {
-	var orderItem models.OrderItem
+	var orderItemService services.OrderItemService
 	id := c.Param("id")
-
-	if err := config.DB.First(&orderItem, id).Error; err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"Error": "OrderItem not found"})
+	err := orderItemService.Delete(id)
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{
+			"message": "OrderItem not found",
+			"error":   err.Error(),
+		})
 		return
 	}
-
-	if err := config.DB.Delete(&orderItem).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"Error": err.Error()})
-		return
-	}
-
 	c.JSON(http.StatusOK, gin.H{"message": "OrderItem deleted successfully"})
 }

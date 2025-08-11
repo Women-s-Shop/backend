@@ -1,72 +1,83 @@
 package handlers
 
 import (
-	"PracticalProject/config"
 	"PracticalProject/models"
+	"PracticalProject/services"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
 
 func GetUsers(c *gin.Context) {
-	var users []models.User
-	if err := config.DB.Find(&users).Error; err != nil {
+	var userService services.UserService
+	users, err := userService.GetAll()
+	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"Error": err.Error()})
 		return
 	}
-	c.JSON(200, users)
+	c.JSON(http.StatusOK, users)
 }
+
 func CreateUser(c *gin.Context) {
 	var user models.User
 	if err := c.ShouldBindJSON(&user); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"Error": err.Error()})
 		return
 	}
-	if err := config.DB.Create(&user).Error; err != nil {
-		c.JSON(500, gin.H{"Error": err.Error()})
+
+	var userService services.UserService
+	createdUser, err := userService.Create(user)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"Error": err.Error()})
 		return
 	}
-	c.JSON(200, user)
+	c.JSON(http.StatusOK, createdUser)
 }
 
 func GetByIdUser(c *gin.Context) {
-	var users models.User
 	idParam := c.Param("id")
-	if err := config.DB.First(&users, idParam).Error; err != nil {
-		c.JSON(404, gin.H{"Error": "There is no such id"})
+
+	var userService services.UserService
+	user, err := userService.GetByID(idParam)
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"Error": "User not found"})
 		return
 	}
 
-	c.JSON(200, gin.H{"This user": users})
+	c.JSON(http.StatusOK, user)
 }
-
 func UpdateUser(c *gin.Context) {
-	var users models.User
 	idParam := c.Param("id")
 
-	if err := config.DB.First(&users, idParam).Error; err != nil {
-		c.JSON(404, gin.H{"Error": "User not found"})
+	var userService services.UserService
+	user, err := userService.GetByID(idParam)
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"Error": "User not found"})
 		return
 	}
 
 	var updateUser models.User
 	if err := c.ShouldBindJSON(&updateUser); err != nil {
-		c.JSON(400, gin.H{"Error": "JSON error"})
+		c.JSON(http.StatusBadRequest, gin.H{"Error": "JSON error"})
+		return
+	}
+	updateUser.ID = user.ID
+	updatedUser, err := userService.Update(updateUser)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"Error": err.Error()})
 		return
 	}
 
-	config.DB.Model(&users).Updates(updateUser)
-	c.JSON(200, users)
+	c.JSON(http.StatusOK, updatedUser)
 }
 
 func DeleteUser(c *gin.Context) {
-	var users models.User
 	idParam := c.Param("id")
 
-	if err := config.DB.First(&users, idParam).Error; err != nil {
+	var userService services.UserService
+	err := userService.Delete(idParam)
+	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"Error": "User not found"})
 		return
 	}
-	config.DB.Delete(&users)
-
-	c.JSON(200, gin.H{"message": "User deleted successfully!!!"})
+	c.JSON(http.StatusOK, gin.H{"message": "User deleted successfully"})
 }
