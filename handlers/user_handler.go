@@ -7,76 +7,91 @@ import (
 	"net/http"
 )
 
-func GetUsers(c *gin.Context) {
-	var userService services.UserService
-	users, err := userService.GetAll()
+type UserHandler struct {
+	service *services.UserService
+}
+
+func NewUserHandler(s *services.UserService) *UserHandler {
+	return &UserHandler{service: s}
+}
+
+func (h *UserHandler) GetUsers(c *gin.Context) {
+	users, err := h.service.GetAll()
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"Error": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 	c.JSON(http.StatusOK, users)
 }
 
-func CreateUser(c *gin.Context) {
+func (h *UserHandler) CreateUser(c *gin.Context) {
 	var user models.User
 	if err := c.ShouldBindJSON(&user); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"Error": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	var userService services.UserService
-	createdUser, err := userService.Create(user)
+	createdUser, err := h.service.Create(user)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"Error": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"message": "User creation filed",
+			"error":   err.Error()})
 		return
 	}
-	c.JSON(http.StatusOK, createdUser)
+	c.JSON(http.StatusCreated, createdUser)
 }
 
-func GetByIdUser(c *gin.Context) {
+func (h *UserHandler) GetByIdUser(c *gin.Context) {
 	idParam := c.Param("id")
 
-	var userService services.UserService
-	user, err := userService.GetByID(idParam)
+	user, err := h.service.GetByID(idParam)
 	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"Error": "User not found"})
+		c.JSON(http.StatusNotFound, gin.H{
+			"message": "User not found",
+			"error":   err.Error()})
 		return
 	}
-
 	c.JSON(http.StatusOK, user)
 }
-func UpdateUser(c *gin.Context) {
+
+func (h *UserHandler) UpdateUser(c *gin.Context) {
 	idParam := c.Param("id")
 
-	var userService services.UserService
-	user, err := userService.GetByID(idParam)
+	existing, err := h.service.GetByID(idParam)
 	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"Error": "User not found"})
+		c.JSON(http.StatusNotFound, gin.H{
+			"message": "User not found",
+			"error":   err.Error()})
 		return
 	}
 
 	var updateUser models.User
 	if err := c.ShouldBindJSON(&updateUser); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"Error": "JSON error"})
-		return
-	}
-	updateUser.ID = user.ID
-	updatedUser, err := userService.Update(updateUser)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"Error": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{
+			"message": "JSON error",
+			"error":   err.Error()})
 		return
 	}
 
-	c.JSON(http.StatusOK, updatedUser)
+	updateUser.ID = existing.ID
+
+	updated, err := h.service.Update(updateUser)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"message": "User updating filed",
+			"error":   err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, updated)
 }
 
-func DeleteUser(c *gin.Context) {
+func (h *UserHandler) DeleteUser(c *gin.Context) {
 	idParam := c.Param("id")
 
-	var userService services.UserService
-	err := userService.Delete(idParam)
-	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"Error": "User not found"})
+	if err := h.service.Delete(idParam); err != nil {
+		c.JSON(http.StatusNotFound, gin.H{
+			"message": "User not found",
+			"error":   err.Error()})
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"message": "User deleted successfully"})
