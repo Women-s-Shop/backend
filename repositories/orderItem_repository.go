@@ -9,6 +9,10 @@ type OrderItemRepository struct {
 	DB *gorm.DB
 }
 
+func NewOrderItemRepository(db *gorm.DB) *OrderItemRepository {
+	return &OrderItemRepository{db}
+}
+
 func (repo *OrderItemRepository) GetAll() ([]models.OrderItem, error) {
 	var orderItems []models.OrderItem
 	err := repo.DB.Find(&orderItems).Error

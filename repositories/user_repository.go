@@ -9,6 +9,10 @@ type UserRepository struct {
 	DB *gorm.DB
 }
 
+func NewUserRepository(DB *gorm.DB) *UserRepository {
+	return &UserRepository{DB}
+}
+
 func (repo *UserRepository) GetAll() ([]models.User, error) {
 	var users []models.User
 	err := repo.DB.Find(&users).Error

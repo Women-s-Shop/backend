@@ -10,6 +10,10 @@ type OrderItemService struct {
 	Repo *repositories.OrderItemRepository
 }
 
+func NewOrderItemService(repo *repositories.OrderItemRepository) *OrderItemService {
+	return &OrderItemService{repo}
+}
+
 func (service *OrderItemService) GetAll() ([]models.OrderItem, error) {
 	return service.Repo.GetAll()
 }

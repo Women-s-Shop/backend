@@ -10,6 +10,10 @@ type UserService struct {
 	Repo *repositories.UserRepository
 }
 
+func NewUserService(repo *repositories.UserRepository) *UserService {
+	return &UserService{repo}
+}
+
 func (service *UserService) GetAll() ([]models.User, error) {
 	return service.Repo.GetAll()
 }

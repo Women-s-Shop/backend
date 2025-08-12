@@ -7,91 +7,97 @@ import (
 	"net/http"
 )
 
-func GetOrderItems(c *gin.Context) {
-	var orderItemService services.OrderService
-	orderItems, err := orderItemService.GetAll()
+type OrderItemHandler struct {
+	service *services.OrderItemService
+}
+
+func NewOrderItemHandler(s *services.OrderItemService) *OrderItemHandler {
+	return &OrderItemHandler{service: s}
+}
+
+func (h *OrderItemHandler) GetOrderItems(c *gin.Context) {
+	items, err := h.service.GetAll()
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
-			"message": "Invalid JSON",
-			"Error":   err.Error(),
+			"message": "Failed to get order items",
+			"error":   err.Error(),
 		})
 		return
 	}
-	c.JSON(http.StatusOK, orderItems)
+	c.JSON(http.StatusOK, items)
 }
 
-func CreateOrderItem(c *gin.Context) {
-	var orderItem models.OrderItem
-	if err := c.ShouldBindJSON(&orderItem); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"Error": err.Error()})
+func (h *OrderItemHandler) CreateOrderItem(c *gin.Context) {
+	var item models.OrderItem
+	if err := c.ShouldBindJSON(&item); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	var orderItemService services.OrderItemService
-	createOrderItem, err := orderItemService.Create(orderItem)
+
+	created, err := h.service.Create(item)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
-			"message": "Order Item creation filed",
+			"message": "Order item creation failed",
 			"error":   err.Error(),
 		})
 		return
 	}
-
-	c.JSON(http.StatusCreated, createOrderItem)
+	c.JSON(http.StatusCreated, created)
 }
 
-func GetOrderItemByID(c *gin.Context) {
-	var orderItemService services.OrderItemService
+func (h *OrderItemHandler) GetOrderItemByID(c *gin.Context) {
 	id := c.Param("id")
-	orderItem, err := orderItemService.GetByID(id)
+
+	item, err := h.service.GetByID(id)
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{
-			"message": "OrderItem not found",
+			"message": "Order item not found",
 			"error":   err.Error(),
 		})
 		return
 	}
-	c.JSON(http.StatusOK, orderItem)
+	c.JSON(http.StatusOK, item)
 }
 
-func UpdateOrderItem(c *gin.Context) {
+func (h *OrderItemHandler) UpdateOrderItem(c *gin.Context) {
 	id := c.Param("id")
-	var orderItemService services.OrderItemService
 
-	orderItem, err := orderItemService.GetByID(id)
+	existing, err := h.service.GetByID(id)
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{
-			"message": "OrderItem not found",
+			"message": "Order item not found",
 			"error":   err.Error(),
 		})
 		return
 	}
-	var updatedOrderItem models.OrderItem
-	if err := c.ShouldBindJSON(&updatedOrderItem); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"Error": err.Error()})
+
+	var update models.OrderItem
+	if err := c.ShouldBindJSON(&update); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "JSON error"})
 		return
 	}
-	updatedOrderItem.ID = orderItem.ID
-	updateItem, err := orderItemService.Update(updatedOrderItem)
+	update.ID = existing.ID
+
+	updated, err := h.service.Update(update)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
-			"message": "OrderItem updating filed",
+			"message": "Order item update failed",
 			"error":   err.Error(),
 		})
 		return
 	}
-	c.JSON(http.StatusOK, updateItem)
+	c.JSON(http.StatusOK, updated)
 }
 
-func DeleteOrderItem(c *gin.Context) {
-	var orderItemService services.OrderItemService
+func (h *OrderItemHandler) DeleteOrderItem(c *gin.Context) {
 	id := c.Param("id")
-	err := orderItemService.Delete(id)
-	if err != nil {
+
+	if err := h.service.Delete(id); err != nil {
 		c.JSON(http.StatusNotFound, gin.H{
-			"message": "OrderItem not found",
+			"message": "Order item not found",
 			"error":   err.Error(),
 		})
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{"message": "OrderItem deleted successfully"})
+	c.JSON(http.StatusOK, gin.H{"message": "Order item deleted successfully"})
 }
