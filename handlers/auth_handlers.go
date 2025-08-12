@@ -28,6 +28,7 @@ func (h *AuthHandler) Register(c *gin.Context) {
 			"message": "User creation filed",
 			"Error":   err.Error(),
 		})
+		return
 	}
 	//hashedPassword, err := bcrypt.GenerateFromPassword([]byte(input.Password), bcrypt.DefaultCost)
 	//if err != nil {
