@@ -70,3 +70,19 @@ func DeleteUser(c *gin.Context) {
 
 	c.JSON(200, gin.H{"message": "User deleted successfully!!!"})
 }
+
+func GetMe(c *gin.Context) {
+	uid, exists := c.Get("userID")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"Error": "Unauthorized"})
+		return
+	}
+
+	var user models.User
+	if err := config.DB.First(&user, uid).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"Error": "User not found"})
+		return
+	}
+
+	c.JSON(http.StatusOK, user)
+}
